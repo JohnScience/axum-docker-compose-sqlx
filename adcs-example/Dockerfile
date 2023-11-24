@@ -20,7 +20,10 @@ COPY Cargo.toml Cargo.lock ./
 RUN cargo build --target x86_64-unknown-linux-musl --release
 
 # Copy the real application code into the container
-COPY src src
+ADD ./src/ /app/src
+
+# Add a dummy line to force Cargo to rebuild the application
+RUN echo "// force Cargo cache invalidation" >> src/main.rs
 
 # Build the application
 RUN cargo build --target x86_64-unknown-linux-musl --release
@@ -32,7 +35,11 @@ RUN strip target/x86_64-unknown-linux-musl/release/adcs-example
 FROM alpine as runtime
 
 # Copy only the compiled binary from the builder stage to this image
-COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/adcs-example /bin/adcs-example
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/adcs-example adcs-example
+
+COPY .env .env
+
+EXPOSE 8080
 
 # Specify the command to run when the container starts
-CMD ["/bin/adcs-example"]
+CMD ["./adcs-example"]

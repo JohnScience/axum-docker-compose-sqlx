@@ -1,0 +1,6 @@
+services:
+  back:
+    build:
+      context: ./adcs-example
+    ports:
+      - "8080:8080"
