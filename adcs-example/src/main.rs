@@ -9,10 +9,9 @@ use sqlx::PgPool;
 
 pub(crate) async fn establish_connection() -> PgPool {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let db = PgPool::connect(&database_url)
+    PgPool::connect(&database_url)
         .await
-        .unwrap_or_else(|e| panic!("Error connecting to {database_url}: {e}"));
-    db
+        .unwrap_or_else(|e| panic!("Error connecting to {database_url}: {e}"))
 }
 
 async fn index() -> &'static str {

@@ -32,18 +32,15 @@ COPY ./.sqlx/ ./.sqlx/
 # Build the application
 RUN cargo build --target x86_64-unknown-linux-musl --release
 
-# (Optional) Remove debug symbols
-RUN strip target/x86_64-unknown-linux-musl/release/adcs-example
-
 # Use a slim image for running the application
 FROM alpine as runtime
 
 # Copy only the compiled binary from the builder stage to this image
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/adcs-example adcs-example
 
-COPY .env .env
-
 EXPOSE 8080
+
+COPY .env .env
 
 # Specify the command to run when the container starts
 CMD ["./adcs-example"]
