@@ -25,6 +25,10 @@ ADD ./src/ /app/src
 # Add a dummy line to force Cargo to rebuild the application
 RUN echo "// force Cargo cache invalidation" >> src/main.rs
 
+ENV SQLX_OFFLINE=true
+
+COPY ./.sqlx/ ./.sqlx/
+
 # Build the application
 RUN cargo build --target x86_64-unknown-linux-musl --release
 

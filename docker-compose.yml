@@ -1,6 +1,20 @@
 services:
+  postgres:
+    hostname: postgres_host
+    container_name: postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: qUu-MAX-7eU-PSW
+      POSTGRES_DB: audio_service_db
+    ports:
+      - "5432:5432"
   back:
     build:
       context: ./adcs-example
     ports:
       - "8080:8080"
+    depends_on:
+      - postgres
+
