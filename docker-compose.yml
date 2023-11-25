@@ -12,9 +12,12 @@ services:
       - "5432:5432"
   back:
     build:
+      dockerfile: dev.Dockerfile
       context: ./adcs-example
+    volumes:
+      - ./adcs-example:/project
     ports:
       - "8080:8080"
     depends_on:
       - postgres
-
+    command: watch -x run
