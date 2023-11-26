@@ -18,20 +18,21 @@ async fn index() -> &'static str {
     "Hello, World!"
 }
 
-async fn test_connection(State(db): State<PgPool>) -> &'static str {
-    let result: i32 = sqlx::query_scalar!("SELECT 1 + 1 AS result")
+async fn test_db_connection(State(db): State<PgPool>) -> &'static str {
+    let result = sqlx::query_scalar!("SELECT 1 + 1 AS result")
         .fetch_one(&db)
-        .await
-        .unwrap()
-        .unwrap();
-    assert_eq!(result, 2);
-    "Connection to the DB tested!"
+        .await;
+    if matches!(result, Ok(Some(2))) {
+        "Successfully connected to the DB!"
+    } else {
+        "Failed to connect to the DB!"
+    }
 }
 
 fn app(db: PgPool) -> Router {
     Router::new()
         .route("/", get(index))
-        .route("/api/test_connection", get(test_connection))
+        .route("/api/test_db_connection", get(test_db_connection))
         .with_state(db)
 }
 

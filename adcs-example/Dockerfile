@@ -16,6 +16,8 @@ RUN cargo init
 # Copy only the dependencies
 COPY Cargo.toml Cargo.lock ./
 
+ENV RUSTFLAGS="-C target-feature=+crt-static"
+
 # A dummy build to get the dependencies compiled and cached
 RUN cargo build --target x86_64-unknown-linux-musl --release
 
@@ -43,4 +45,4 @@ EXPOSE 8080
 COPY .env .env
 
 # Specify the command to run when the container starts
-CMD ["./adcs-example"]
+ENTRYPOINT ["./adcs-example"]
