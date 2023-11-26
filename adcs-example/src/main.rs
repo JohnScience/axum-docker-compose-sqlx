@@ -7,7 +7,7 @@ use axum::{extract::State, routing::get, Router};
 use dotenvy::dotenv;
 use sqlx::PgPool;
 
-pub(crate) async fn establish_connection() -> PgPool {
+pub(crate) async fn establish_db_connection() -> PgPool {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     PgPool::connect(&database_url)
         .await
@@ -41,7 +41,7 @@ async fn main() {
     // load the .env file if it exists
     dotenv().ok();
 
-    let db: sqlx::Pool<sqlx::Postgres> = establish_connection().await;
+    let db: PgPool = establish_db_connection().await;
 
     let addr: SocketAddr = {
         let mut iter = env::var("SOCKET_ADDR")
@@ -52,7 +52,6 @@ async fn main() {
             .expect("Failed to get the first socket address for SOCKET_ADDR")
     };
 
-    // run it with hyper on localhost:3000
     axum::Server::bind(&addr)
         .serve(app(db).into_make_service())
         .await

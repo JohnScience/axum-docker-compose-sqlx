@@ -1,5 +1,5 @@
 # Use a base image with the latest version of Rust installed
-FROM rust:latest as builder
+FROM rust:1.74-slim-bullseye as builder
 
 # Set the working directory in the container
 WORKDIR /app
@@ -16,6 +16,7 @@ RUN cargo init
 # Copy only the dependencies
 COPY Cargo.toml Cargo.lock ./
 
+# Enable static linking for the musl target
 ENV RUSTFLAGS="-C target-feature=+crt-static"
 
 # A dummy build to get the dependencies compiled and cached
@@ -27,8 +28,11 @@ ADD ./src/ /app/src
 # Add a dummy line to force Cargo to rebuild the application
 RUN echo "// force Cargo cache invalidation" >> src/main.rs
 
+# Enable offline mode for sqlx in order to avoid SQL database connection errors
 ENV SQLX_OFFLINE=true
 
+# Copy the sqlx configuration files into the container, this gives SQLX the
+# information it needs to validate the SQL queries at compile time
 COPY ./.sqlx/ ./.sqlx/
 
 # Build the application
@@ -40,9 +44,11 @@ FROM alpine as runtime
 # Copy only the compiled binary from the builder stage to this image
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/adcs-example adcs-example
 
+# Expose the port that the application will listen on
 EXPOSE 8080
 
-COPY .env .env
+# Copy the environment file into the container
+COPY .docker.env .env
 
 # Specify the command to run when the container starts
 ENTRYPOINT ["./adcs-example"]
